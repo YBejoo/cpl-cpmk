@@ -187,12 +187,7 @@ export default function LaporanPage() {
 
   return (
     <div>
-      <Header
-        title="Laporan"
-        description="Analisis dan statistik CPL-CPMK"
-      />
-
-      <div className="p-6 space-y-6">
+      <div className="p-4 space-y-6">
         <Button
           variant="outline"
           onClick={() => navigate(-1)}

@@ -1,25 +1,48 @@
 import { Outlet } from "react-router";
 import { Sidebar } from "~/components/sidebar";
 import { Header } from "~/components/header";
+import { SidebarProvider, useSidebar } from "~/contexts/sidebar-context";
 
-export default function MainLayout() {
+function MainLayoutContent() {
+  const { isCollapsed } = useSidebar();
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh", backgroundColor: "#f8fafc" }}>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, marginLeft: "180px", display: "flex", flexDirection: "column" }}>
-        {/* Header - Fixed */}
-        <div style={{ position: "sticky", top: 0, zIndex: 40 }}>
-          <Header />
-        </div>
+      <div 
+        className={`
+          flex flex-col min-h-screen
+          transition-all duration-300 ease-in-out
+          ${isCollapsed ? "ml-17" : "ml-60"}
+        `}
+      >
+        {/* Header */}
+        <Header />
 
         {/* Page Content */}
-        <main style={{ flex: 1, padding: "24px", backgroundColor: "#f8fafc" }}>
+        <main className="flex-1 p-6">
           <Outlet />
         </main>
+
+        {/* Footer */}
+        <footer className="py-4 px-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+            <span>© 2026 SI-CAP - Sistem Informasi Capaian Pembelajaran</span>
+            <span>Version 1.0.0</span>
+          </div>
+        </footer>
       </div>
     </div>
+  );
+}
+
+export default function MainLayout() {
+  return (
+    <SidebarProvider>
+      <MainLayoutContent />
+    </SidebarProvider>
   );
 }

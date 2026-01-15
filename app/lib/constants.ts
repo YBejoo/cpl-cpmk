@@ -7,6 +7,7 @@ export const NAV_ITEMS = [
   { title: "Dashboard", href: "/", icon: "LayoutDashboard" },
   { title: "Kurikulum", href: "/kurikulum", icon: "BookOpen" },
   { title: "Profil/CPL", href: "/cpl", icon: "Target" },
+  { title: "Bahan Kajian", href: "/bahan-kajian", icon: "Layers" },
   { title: "MK", href: "/mata-kuliah", icon: "Book" },
   { title: "[Matrix]", href: "/matrix-cpl-mk", icon: "Grid3X3" },
   { title: "RPS", href: "/rps", icon: "FileText" },
