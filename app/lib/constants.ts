@@ -6,10 +6,11 @@ export const UNIVERSITAS_NAME = "Universitas Sriwijaya";
 export const NAV_ITEMS = [
   { title: "Dashboard", href: "/", icon: "LayoutDashboard" },
   { title: "Kurikulum", href: "/kurikulum", icon: "BookOpen" },
-  { title: "Profil/CPL", href: "/cpl", icon: "Target" },
+  { title: "Profil Lulusan", href: "/profil-lulusan", icon: "GraduationCap" },
+  { title: "KUL", href: "/kompetensi-utama", icon: "Award" },
+  { title: "CPL", href: "/cpl", icon: "Target" },
   { title: "Bahan Kajian", href: "/bahan-kajian", icon: "Layers" },
-  { title: "MK", href: "/mata-kuliah", icon: "Book" },
-  { title: "[Matrix]", href: "/matrix-cpl-mk", icon: "Grid3X3" },
+  { title: "Mata Kuliah", href: "/mata-kuliah", icon: "Book" },
   { title: "RPS", href: "/rps", icon: "FileText" },
   { title: "Laporan", href: "/laporan", icon: "BarChart3" },
 ] as const;
@@ -35,12 +36,17 @@ export const SIFAT_MK_OPTIONS = [
   { value: "Pilihan", label: "Pilihan" },
 ];
 
-export const ASPEK_CPL_OPTIONS = [
-  { value: "Sikap", label: "Sikap" },
-  { value: "Pengetahuan", label: "Pengetahuan" },
-  { value: "Keterampilan Umum", label: "Keterampilan Umum" },
-  { value: "Keterampilan Khusus", label: "Keterampilan Khusus" },
+// Aspek KUL & CPL (S=Sikap, P=Pengetahuan, KU=Keterampilan Umum, KK=Keterampilan Khusus)
+export const ASPEK_OPTIONS = [
+  { value: "S", label: "S - Sikap" },
+  { value: "P", label: "P - Pengetahuan" },
+  { value: "KU", label: "KU - Keterampilan Umum" },
+  { value: "KK", label: "KK - Keterampilan Khusus" },
 ];
+
+// Alias untuk backward compatibility
+export const ASPEK_CPL_OPTIONS = ASPEK_OPTIONS;
+export const ASPEK_KUL_OPTIONS = ASPEK_OPTIONS;
 
 export const STATUS_RPS_OPTIONS = [
   { value: "Draft", label: "Draft" },

@@ -5,13 +5,13 @@ export default [
     // Dashboard
     index("pages/dashboard.tsx"),
     
-    // Master Data - Kurikulum
+    // Master Data - Kurikulum & CPL-CPMK
     route("kurikulum", "pages/kurikulum.tsx"),
     route("profil-lulusan", "pages/profil-lulusan.tsx"),
-    route("cpl", "pages/cpl.tsx"),
-    route("bahan-kajian", "pages/bahan-kajian.tsx"),
-    route("mata-kuliah", "pages/mata-kuliah.tsx"),
-    route("matrix-cpl-mk", "pages/matrix-cpl-mk.tsx"),
+    route("kompetensi-utama", "pages/kompetensi-utama.tsx"),
+    route("cpl", "pages/cpl.tsx"),                      // Include Matrix CPL-PL
+    route("bahan-kajian", "pages/bahan-kajian.tsx"),    // Include Matrix CPL-BK
+    route("mata-kuliah", "pages/mata-kuliah.tsx"),      // Include Matrix CPL-MK
     
     // RPS & CPMK
     route("cpmk", "pages/cpmk.tsx"),
