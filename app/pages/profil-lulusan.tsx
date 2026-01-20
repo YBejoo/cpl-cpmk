@@ -213,11 +213,11 @@ export default function ProfilLulusanPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">Kode</TableHead>
-                <TableHead className="w-[180px]">Profil Lulusan</TableHead>
+                <TableHead className="w-25">Kode</TableHead>
+                <TableHead className="w-45">Profil Lulusan</TableHead>
                 <TableHead>Deskripsi</TableHead>
-                <TableHead className="w-[200px]">Sumber</TableHead>
-                <TableHead className="w-[120px] text-right">Aksi</TableHead>
+                <TableHead className="w-50">Sumber</TableHead>
+                <TableHead className="w-30 text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

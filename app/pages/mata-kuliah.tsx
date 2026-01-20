@@ -29,8 +29,20 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui";
-import type { MataKuliah, BahanKajian, SifatMK, CPL, AspekKUL } from "~/types";
+import type { MataKuliah, BahanKajian, SifatMK, CPL, AspekKUL, Dosen } from "~/types";
 import { SEMESTER_OPTIONS, SIFAT_MK_OPTIONS, ASPEK_KUL_OPTIONS } from "~/lib/constants";
+
+// Dummy Dosen data
+const dummyDosen: Dosen[] = [
+  { id_dosen: "1", nip: "198501012010011001", nama_dosen: "Dr. Ahmad Susanto, M.Kom", bidang_keahlian: "Algoritma dan Pemrograman", jabatan_fungsional: "Lektor Kepala" },
+  { id_dosen: "2", nip: "198702152012012002", nama_dosen: "Dr. Budi Prasetyo, M.T.", bidang_keahlian: "Basis Data", jabatan_fungsional: "Lektor" },
+  { id_dosen: "3", nip: "199003252015011003", nama_dosen: "Citra Dewi, S.Kom., M.Cs.", bidang_keahlian: "Pengembangan Web", jabatan_fungsional: "Asisten Ahli" },
+  { id_dosen: "4", nip: "198805102013021004", nama_dosen: "Dedi Firmansyah, S.T., M.Kom.", bidang_keahlian: "Jaringan Komputer", jabatan_fungsional: "Lektor" },
+  { id_dosen: "5", nip: "199108302017031005", nama_dosen: "Eka Putri, S.Kom., M.Kom.", bidang_keahlian: "Rekayasa Perangkat Lunak", jabatan_fungsional: "Asisten Ahli" },
+  { id_dosen: "6", nip: "198612182011011006", nama_dosen: "Dr. Fajar Hidayat, M.Kom.", bidang_keahlian: "Kecerdasan Buatan", jabatan_fungsional: "Lektor Kepala" },
+  { id_dosen: "7", nip: "199205152019012007", nama_dosen: "Gita Sari, S.Kom., M.T.", bidang_keahlian: "Sistem Informasi", jabatan_fungsional: "Asisten Ahli" },
+  { id_dosen: "8", nip: "198909222014031008", nama_dosen: "Hendra Wijaya, S.T., M.Kom.", bidang_keahlian: "Keamanan Siber", jabatan_fungsional: "Lektor" },
+];
 
 // Dummy CPL data
 const dummyCPL: CPL[] = [
@@ -177,6 +189,7 @@ export default function MataKuliahPage() {
   const [mataKuliahList, setMataKuliahList] = useState<MataKuliah[]>(initialMataKuliah);
   const [cplList] = useState<CPL[]>(dummyCPL);
   const [bkList] = useState<BahanKajian[]>(dummyBahanKajian);
+  const [dosenList] = useState<Dosen[]>(dummyDosen);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterSemester, setFilterSemester] = useState<string>("all");
   const [filterSifat, setFilterSifat] = useState<string>("all");
@@ -184,6 +197,11 @@ export default function MataKuliahPage() {
   const [editingMK, setEditingMK] = useState<MataKuliah | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingMK, setDeletingMK] = useState<MataKuliah | null>(null);
+  
+  // Dialog Penugasan Dosen
+  const [isPenugasanDialogOpen, setIsPenugasanDialogOpen] = useState(false);
+  const [penugasanMK, setPenugasanMK] = useState<MataKuliah | null>(null);
+  const [selectedDosenIds, setSelectedDosenIds] = useState<string[]>([]);
   
   // Tab state for MK List vs Matrix
   const [activeTab, setActiveTab] = useState<"list" | "matrix">("list");
@@ -341,6 +359,56 @@ export default function MataKuliahPage() {
 
   const countMKMatrixMappings = (mkKode: string) => {
     return Object.values(matrixMappings).filter((mks) => mks.includes(mkKode)).length;
+  };
+
+  // Penugasan Dosen functions
+  const [dosenSearchTerm, setDosenSearchTerm] = useState("");
+  
+  const openPenugasanDialog = (mk: MataKuliah) => {
+    setPenugasanMK(mk);
+    setSelectedDosenIds(mk.dosen_pengampu?.map(d => d.id_dosen) || []);
+    setDosenSearchTerm("");
+    setIsPenugasanDialogOpen(true);
+  };
+
+  const closePenugasanDialog = () => {
+    setIsPenugasanDialogOpen(false);
+    setPenugasanMK(null);
+    setSelectedDosenIds([]);
+    setDosenSearchTerm("");
+  };
+
+  const addDosenToSelection = (dosenId: string) => {
+    if (!selectedDosenIds.includes(dosenId)) {
+      setSelectedDosenIds(prev => [...prev, dosenId]);
+    }
+    setDosenSearchTerm("");
+  };
+
+  const removeDosenFromSelection = (dosenId: string) => {
+    setSelectedDosenIds(prev => prev.filter(id => id !== dosenId));
+  };
+
+  // Filter dosen for dropdown (exclude already selected)
+  const availableDosen = dosenList.filter(d => 
+    !selectedDosenIds.includes(d.id_dosen) &&
+    (d.nama_dosen.toLowerCase().includes(dosenSearchTerm.toLowerCase()) ||
+     d.nip.includes(dosenSearchTerm) ||
+     d.bidang_keahlian?.toLowerCase().includes(dosenSearchTerm.toLowerCase()))
+  );
+
+  const savePenugasanDosen = () => {
+    if (penugasanMK) {
+      const selectedDosen = dosenList.filter(d => selectedDosenIds.includes(d.id_dosen));
+      setMataKuliahList(prev => 
+        prev.map(mk => 
+          mk.kode_mk === penugasanMK.kode_mk
+            ? { ...mk, dosen_pengampu: selectedDosen }
+            : mk
+        )
+      );
+      closePenugasanDialog();
+    }
   };
 
   return (
@@ -574,7 +642,7 @@ export default function MataKuliahPage() {
               Matrix CPL - Mata Kuliah
             </CardTitle>
             <CardDescription>
-              Klik pada sel untuk menghubungkan CPL dengan Mata Kuliah
+              Klik pada sel untuk menghubungkan CPL dengan Mata Kuliah. Gunakan tombol penugasan untuk menentukan dosen pengampu.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -588,11 +656,11 @@ export default function MataKuliahPage() {
                     {mataKuliahList.map((mk) => (
                       <th
                         key={mk.kode_mk}
-                        className="px-2 py-3 border-b text-center text-sm font-semibold text-gray-900 min-w-20"
+                        className="px-2 py-3 border-b text-center text-sm font-semibold text-gray-900 min-w-24"
                       >
                         <div className="flex flex-col items-center gap-1">
-                          <span className="text-xs">{mk.kode_mk}</span>
-                          <span className="text-xs font-normal text-muted-foreground truncate max-w-16" title={mk.nama_mk}>
+                          <span className="text-xs font-bold">{mk.kode_mk}</span>
+                          <span className="text-xs font-normal text-muted-foreground truncate max-w-20" title={mk.nama_mk}>
                             Sem {mk.semester}
                           </span>
                         </div>
@@ -601,6 +669,55 @@ export default function MataKuliahPage() {
                     <th className="px-3 py-3 border-b border-l text-center text-sm font-semibold text-gray-900 min-w-16">
                       Total
                     </th>
+                  </tr>
+                  {/* Dosen Pengampu Row */}
+                  <tr className="bg-amber-50">
+                    <td className="sticky left-0 bg-amber-50 z-20 px-4 py-2 border-b border-r">
+                      <div className="flex items-center gap-2">
+                        <Icons.Users size={16} className="text-amber-600" />
+                        <span className="text-sm font-semibold text-amber-700">Dosen Pengampu</span>
+                      </div>
+                    </td>
+                    {mataKuliahList.map((mk) => (
+                      <td key={mk.kode_mk} className="px-2 py-2 border-b text-center">
+                        <button
+                          onClick={() => openPenugasanDialog(mk)}
+                          className="w-full"
+                        >
+                          {mk.dosen_pengampu && mk.dosen_pengampu.length > 0 ? (
+                            <div className="flex flex-col items-center gap-1">
+                              <div className="flex -space-x-2">
+                                {mk.dosen_pengampu.slice(0, 3).map((dosen, idx) => (
+                                  <div
+                                    key={dosen.id_dosen}
+                                    className="w-6 h-6 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-semibold"
+                                    title={dosen.nama_dosen}
+                                  >
+                                    {dosen.nama_dosen.charAt(0)}
+                                  </div>
+                                ))}
+                                {mk.dosen_pengampu.length > 3 && (
+                                  <div className="w-6 h-6 rounded-full bg-gray-400 border-2 border-white flex items-center justify-center text-[10px] text-white font-semibold">
+                                    +{mk.dosen_pengampu.length - 3}
+                                  </div>
+                                )}
+                              </div>
+                              <span className="text-[10px] text-muted-foreground">
+                                {mk.dosen_pengampu.length} dosen
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center gap-1 py-1 px-2 rounded-md border-2 border-dashed border-amber-300 hover:border-amber-400 hover:bg-amber-100 transition-colors">
+                              <Icons.UserPlus size={14} className="text-amber-500" />
+                              <span className="text-[10px] text-amber-600">Tugaskan</span>
+                            </div>
+                          )}
+                        </button>
+                      </td>
+                    ))}
+                    <td className="px-3 py-2 border-b border-l text-center text-sm font-semibold text-amber-700">
+                      {mataKuliahList.filter(mk => mk.dosen_pengampu && mk.dosen_pengampu.length > 0).length}/{mataKuliahList.length}
+                    </td>
                   </tr>
                 </thead>
                 <tbody>
@@ -884,6 +1001,178 @@ export default function MataKuliahPage() {
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
               Hapus
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Penugasan Dosen Dialog */}
+      <Dialog open={isPenugasanDialogOpen} onOpenChange={setIsPenugasanDialogOpen}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Icons.Users size={20} className="text-amber-600" />
+              Penugasan Dosen Pengampu
+            </DialogTitle>
+            <DialogDescription>
+              {penugasanMK && (
+                <span>
+                  Tentukan dosen pengampu untuk <strong>{penugasanMK.kode_mk} - {penugasanMK.nama_mk}</strong>
+                </span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* MK Info */}
+            {penugasanMK && (
+              <div className="p-3 bg-gray-50 rounded-lg border">
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Kode MK:</span>
+                    <span className="ml-2 font-semibold">{penugasanMK.kode_mk}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">SKS:</span>
+                    <span className="ml-2 font-semibold">{penugasanMK.sks}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Semester:</span>
+                    <span className="ml-2 font-semibold">{penugasanMK.semester}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Sifat:</span>
+                    <span className="ml-2">
+                      <Badge variant={penugasanMK.sifat === "Wajib" ? "default" : "secondary"}>
+                        {penugasanMK.sifat}
+                      </Badge>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Dosen Terpilih */}
+            <div className="space-y-2">
+              <Label>Dosen Pengampu Terpilih</Label>
+              {selectedDosenIds.length === 0 ? (
+                <div className="p-4 border-2 border-dashed rounded-lg text-center text-muted-foreground">
+                  <Icons.Users size={24} className="mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Belum ada dosen yang ditugaskan</p>
+                  <p className="text-xs">Gunakan dropdown di bawah untuk menambahkan dosen</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {selectedDosenIds.map((dosenId, index) => {
+                    const dosen = dosenList.find(d => d.id_dosen === dosenId);
+                    if (!dosen) return null;
+                    return (
+                      <div
+                        key={dosen.id_dosen}
+                        className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold text-sm">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-sm">{dosen.nama_dosen}</span>
+                            {dosen.jabatan_fungsional && (
+                              <Badge variant="outline" className="text-xs">
+                                {dosen.jabatan_fungsional}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            NIP: {dosen.nip}
+                            {dosen.bidang_keahlian && ` • ${dosen.bidang_keahlian}`}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => removeDosenFromSelection(dosen.id_dosen)}
+                        >
+                          <Icons.X size={16} />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Tambah Dosen */}
+            <div className="space-y-2">
+              <Label>Tambah Dosen Pengampu</Label>
+              <div className="relative">
+                <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Cari dosen (nama, NIP, atau keahlian)..."
+                  value={dosenSearchTerm}
+                  onChange={(e) => setDosenSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              
+              {/* Dropdown Results */}
+              {dosenSearchTerm && (
+                <div className="border rounded-lg max-h-48 overflow-y-auto">
+                  {availableDosen.length === 0 ? (
+                    <div className="p-3 text-center text-muted-foreground text-sm">
+                      {dosenList.filter(d => !selectedDosenIds.includes(d.id_dosen)).length === 0 
+                        ? "Semua dosen sudah ditugaskan"
+                        : "Tidak ada dosen yang cocok"
+                      }
+                    </div>
+                  ) : (
+                    availableDosen.map((dosen) => (
+                      <button
+                        key={dosen.id_dosen}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 border-b last:border-b-0 text-left transition-colors"
+                        onClick={() => addDosenToSelection(dosen.id_dosen)}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold text-sm">
+                          {dosen.nama_dosen.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-sm">{dosen.nama_dosen}</span>
+                            {dosen.jabatan_fungsional && (
+                              <Badge variant="outline" className="text-xs">
+                                {dosen.jabatan_fungsional}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            NIP: {dosen.nip}
+                            {dosen.bidang_keahlian && ` • ${dosen.bidang_keahlian}`}
+                          </p>
+                        </div>
+                        <Icons.Plus size={16} className="text-blue-500" />
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Show available count */}
+              {!dosenSearchTerm && (
+                <p className="text-xs text-muted-foreground">
+                  {dosenList.filter(d => !selectedDosenIds.includes(d.id_dosen)).length} dosen tersedia untuk ditugaskan
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={closePenugasanDialog}>
+              Batal
+            </Button>
+            <Button onClick={savePenugasanDosen}>
+              <Icons.Check size={16} className="mr-2" />
+              Simpan Penugasan ({selectedDosenIds.length} dosen)
             </Button>
           </DialogFooter>
         </DialogContent>

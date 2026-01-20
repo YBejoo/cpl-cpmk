@@ -99,6 +99,21 @@ export interface MataKuliah {
   kurikulum?: Kurikulum;
   bahan_kajian?: BahanKajian;    // Hanya 1 Bahan Kajian
   cpl_list?: CPL[];              // Multiple CPL
+  dosen_pengampu?: Dosen[];      // Dosen yang ditugaskan mengampu MK
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+// =====================
+// 7. DOSEN - Data Dosen Pengampu
+// =====================
+export interface Dosen {
+  id_dosen: string;
+  nip: string;
+  nama_dosen: string;
+  email?: string;
+  bidang_keahlian?: string;
+  jabatan_fungsional?: string;  // Asisten Ahli, Lektor, Lektor Kepala, Guru Besar
   created_at?: Date;
   updated_at?: Date;
 }

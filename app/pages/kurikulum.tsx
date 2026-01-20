@@ -202,7 +202,7 @@ export default function KurikulumPage() {
 
                 {/* Filter Status */}
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectTrigger className="w-full sm:w-45">
                     <SelectValue placeholder="Filter Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -235,9 +235,9 @@ export default function KurikulumPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nama Kurikulum</TableHead>
-                  <TableHead className="w-[100px]">Tahun</TableHead>
-                  <TableHead className="w-[100px]">Status</TableHead>
-                  <TableHead className="w-[200px] text-right">Aksi</TableHead>
+                  <TableHead className="w-25">Tahun</TableHead>
+                  <TableHead className="w-25">Status</TableHead>
+                  <TableHead className="w-50 text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
