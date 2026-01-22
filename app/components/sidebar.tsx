@@ -12,6 +12,9 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; className?: s
   Grid3X3: Icons.Grid3X3,
   FileText: Icons.FileText,
   BarChart3: Icons.BarChart3,
+  GraduationCap: Icons.GraduationCap,
+  Award: Icons.Award,
+  Users: Icons.Users,
 };
 
 export function Sidebar() {
@@ -133,7 +136,7 @@ export function Sidebar() {
             ) : (
               <>
                 <Icons.ChevronLeft size={20} />
-                <span className="text-sm font-medium">Collapse</span>
+                <span className="text-sm font-medium">Sembunyikan</span>
               </>
             )}
           </button>

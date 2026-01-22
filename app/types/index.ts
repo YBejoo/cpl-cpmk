@@ -2,8 +2,9 @@
 // ENTITY TYPES - Sistem RPS & CPMK (OBE)
 // =====================
 
-// Enum untuk aspek CPL
-export type AspekCPL = 'Sikap' | 'Pengetahuan' | 'Keterampilan Umum' | 'Keterampilan Khusus';
+// Enum untuk aspek KUL & CPL (S=Sikap, P=Pengetahuan, KU=Keterampilan Umum, KK=Keterampilan Khusus)
+export type AspekKUL = 'S' | 'P' | 'KU' | 'KK';
+export type AspekCPL = AspekKUL; // CPL mengikuti aspek KUL
 
 // Enum untuk sifat mata kuliah
 export type SifatMK = 'Wajib' | 'Pilihan';
@@ -24,28 +25,42 @@ export interface Kurikulum {
 }
 
 // =====================
-// 2. PROFIL LULUSAN
+// 2. PROFIL LULUSAN (Kode, Profil Lulusan, Deskripsi, Sumber)
 // =====================
 export interface ProfilLulusan {
   id_profil: string;
   kode_profil: string;     // PL-01, PL-02, dst
-  peran: string;           // Software Engineer, Data Scientist
-  deskripsi: string;
+  profil_lulusan: string;  // Nama profil: Software Engineer, Data Analyst, dll
+  deskripsi: string;       // Deskripsi detail profil
+  sumber: string;          // Sumber referensi profil
   id_kurikulum: string;
   kurikulum?: Kurikulum;
-  cpl_terkait?: string[];  // Array ID/Kode CPL
   created_at?: Date;
   updated_at?: Date;
 }
 
 // =====================
-// 3. CAPAIAN PEMBELAJARAN LULUSAN (CPL)
+// 3. KOMPETENSI UTAMA LULUSAN (Kode, Kompetensi Lulusan, Aspek)
+// =====================
+export interface KompetensiUtamaLulusan {
+  id_kul: string;
+  kode_kul: string;              // S1, P1, KU1, KK1, dst
+  kompetensi_lulusan: string;    // Deskripsi kompetensi lulusan
+  aspek: AspekKUL;               // S, P, KU, KK
+  id_kurikulum: string;
+  kurikulum?: Kurikulum;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+// =====================
+// 4. CAPAIAN PEMBELAJARAN LULUSAN (CPL) - Kode, Deskripsi, Aspek (Kompetensi)
 // =====================
 export interface CPL {
   id_cpl: string;
-  kode_cpl: string;        // S1, P1, KK1, KU1
-  aspek: AspekCPL;
-  deskripsi_cpl: string;
+  kode_cpl: string;        // CPL-01, CPL-02 atau S1, P1, KK1, KU1
+  deskripsi_cpl: string;   // Deskripsi capaian
+  aspek: AspekCPL;         // Sikap, Pengetahuan, Keterampilan Umum/Khusus (dari KUL)
   id_kurikulum: string;
   kurikulum?: Kurikulum;
   created_at?: Date;
@@ -53,32 +68,25 @@ export interface CPL {
 }
 
 // =====================
-// 4. KOMPETENSI UTAMA LULUSAN
-// =====================
-export interface KompetensiUtama {
-  id_kompetensi: string;
-  nama_kompetensi: string;
-  level_kkni: number;      // 1-9
-  id_profil: string;
-  profil?: ProfilLulusan;
-  created_at?: Date;
-  updated_at?: Date;
-}
-
-// =====================
-// 5. BAHAN KAJIAN
+// 5. BAHAN KAJIAN (Aspek, Kode, Nama, Ranah Keilmuan)
 // =====================
 export interface BahanKajian {
   id_bahan_kajian: string;
+  kode_bk: string;             // BK-01, BK-02, dst
   nama_bahan_kajian: string;
-  deskripsi?: string;
-  bobot_min?: number;
+  aspek: AspekKUL;             // S, P, KU, KK (sesuai KUL)
+  ranah_keilmuan: string;      // Input text bebas
+  id_kurikulum: string;
+  kurikulum?: Kurikulum;
   created_at?: Date;
   updated_at?: Date;
 }
 
+// Legacy type alias untuk backward compatibility
+export type KompetensiUtama = KompetensiUtamaLulusan;
+
 // =====================
-// 6. MATA KULIAH (MK)
+// 6. MATA KULIAH (MK) - 1 Bahan Kajian, Multiple CPL
 // =====================
 export interface MataKuliah {
   kode_mk: string;
@@ -89,7 +97,23 @@ export interface MataKuliah {
   deskripsi?: string;
   id_kurikulum: string;
   kurikulum?: Kurikulum;
-  bahan_kajian?: BahanKajian[];
+  bahan_kajian?: BahanKajian;    // Hanya 1 Bahan Kajian
+  cpl_list?: CPL[];              // Multiple CPL
+  dosen_pengampu?: Dosen[];      // Dosen yang ditugaskan mengampu MK
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+// =====================
+// 7. DOSEN - Data Dosen Pengampu
+// =====================
+export interface Dosen {
+  id_dosen: string;
+  nip: string;
+  nama_dosen: string;
+  email?: string;
+  bidang_keahlian?: string;
+  jabatan_fungsional?: string;  // Asisten Ahli, Lektor, Lektor Kepala, Guru Besar
   created_at?: Date;
   updated_at?: Date;
 }
@@ -204,10 +228,10 @@ export interface Pertemuan {
 // FORM TYPES
 // =====================
 export type KurikulumForm = Omit<Kurikulum, 'id_kurikulum' | 'created_at' | 'updated_at'>;
-export type ProfilLulusanForm = Omit<ProfilLulusan, 'id_profil' | 'kurikulum' | 'cpl_terkait' | 'created_at' | 'updated_at'>;
+export type ProfilLulusanForm = Omit<ProfilLulusan, 'id_profil' | 'kurikulum' | 'created_at' | 'updated_at'>;
 export type CPLForm = Omit<CPL, 'id_cpl' | 'kurikulum' | 'created_at' | 'updated_at'>;
-export type KompetensiUtamaForm = Omit<KompetensiUtama, 'id_kompetensi' | 'profil' | 'created_at' | 'updated_at'>;
-export type BahanKajianForm = Omit<BahanKajian, 'id_bahan_kajian' | 'created_at' | 'updated_at'>;
+export type KompetensiUtamaLulusanForm = Omit<KompetensiUtamaLulusan, 'id_kul' | 'kurikulum' | 'created_at' | 'updated_at'>;
+export type BahanKajianForm = Omit<BahanKajian, 'id_bahan_kajian' | 'kurikulum' | 'created_at' | 'updated_at'>;
 export type MataKuliahForm = Omit<MataKuliah, 'kurikulum' | 'bahan_kajian' | 'created_at' | 'updated_at'>;
 export type CPMKForm = Omit<CPMK, 'id_cpmk' | 'mata_kuliah' | 'cpl' | 'created_at' | 'updated_at'>;
 export type SubCPMKForm = Omit<SubCPMK, 'id_sub_cpmk' | 'cpmk' | 'created_at' | 'updated_at'>;
@@ -245,7 +269,39 @@ export interface DashboardStats {
   totalRPS: number;
   rpsSelesai: number;
   rpsDraft: number;
-  kurikulumAktif?: Kurikulum;
+  kurikulumAktif?: Kurikulum[];
+  kkm: number; // Kriteria Ketuntasan Minimal
+}
+
+// =====================
+// MAHASISWA - Data Mahasiswa
+// =====================
+export interface Mahasiswa {
+  nim: string;
+  nama_mahasiswa: string;
+  angkatan: number;
+  prodi?: string;
+  email?: string;
+  foto_url?: string;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+// =====================
+// NILAI MAHASISWA - Nilai per CPMK/Sub-CPMK
+// =====================
+export interface NilaiMahasiswa {
+  id_nilai: string;
+  nim: string;
+  kode_mk: string;
+  id_cpmk: string;
+  nilai: number;
+  semester: string; // contoh: "2024/2025 Ganjil"
+  mahasiswa?: Mahasiswa;
+  mata_kuliah?: MataKuliah;
+  cpmk?: CPMK;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 // =====================
@@ -267,4 +323,62 @@ export interface RecentRPSUpdate {
   nama_mk: string;
   dosen_pengampu: string;
   updated_at: Date;
+}
+
+// Grafik Profil Lulusan
+export interface ProfilLulusanChartData {
+  kode: string;
+  nama: string;
+  jumlah_cpl: number;
+  persentase: number;
+}
+
+// Grafik CPL (Bahan Kajian)
+export interface CPLChartData {
+  kode: string;
+  nama: string;
+  rata_rata: number;
+  jumlah_mk: number;
+}
+
+// Grafik Bahan Kajian (Mata Kuliah)
+export interface BahanKajianChartData {
+  kode: string;
+  nama: string;
+  rata_rata: number;
+  jumlah_mahasiswa: number;
+}
+
+// Grafik Mahasiswa di bawah KKM per MK
+export interface MahasiswaBawahKKMData {
+  kode_mk: string;
+  nama_mk: string;
+  jumlah_dibawah_kkm: number;
+  total_mahasiswa: number;
+  persentase: number;
+}
+
+// Grafik CPMK per Mata Kuliah
+export interface CPMKRataRataData {
+  kode_cpmk: string;
+  rata_rata: number;
+  jumlah_mahasiswa: number;
+}
+
+// Data Nilai Mahasiswa per MK (from API)
+export interface NilaiMahasiswaPerMK {
+  nim: string;
+  nama_mahasiswa: string;
+  angkatan: number;
+  nilai_per_cpmk: { kode_cpmk: string; nilai: number }[];
+  nilai_akhir: number;
+  status: 'Lulus' | 'Tidak Lulus';
+}
+
+// Data untuk Chart Nilai Mahasiswa Individual
+export interface MahasiswaNilaiChartItem {
+  kode_mk: string;
+  nama_mk: string;
+  nilai_akhir: number;
+  status: string;
 }

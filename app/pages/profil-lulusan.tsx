@@ -7,7 +7,6 @@ import {
   CardTitle,
   Icons,
   Button,
-  Badge,
   Input,
   Label,
   Textarea,
@@ -24,44 +23,41 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui";
-import type { ProfilLulusan, CPL } from "~/types";
+import type { ProfilLulusan } from "~/types";
 
-// Dummy CPL data untuk relasi
-const dummyCPLs: CPL[] = [
-  { id_cpl: "1", kode_cpl: "S1", aspek: "Sikap", deskripsi_cpl: "Bertakwa kepada Tuhan YME", id_kurikulum: "1" },
-  { id_cpl: "2", kode_cpl: "S2", aspek: "Sikap", deskripsi_cpl: "Menjunjung tinggi nilai kemanusiaan", id_kurikulum: "1" },
-  { id_cpl: "3", kode_cpl: "P1", aspek: "Pengetahuan", deskripsi_cpl: "Menguasai konsep teoritis bidang TI", id_kurikulum: "1" },
-  { id_cpl: "4", kode_cpl: "P2", aspek: "Pengetahuan", deskripsi_cpl: "Menguasai prinsip rekayasa perangkat lunak", id_kurikulum: "1" },
-  { id_cpl: "5", kode_cpl: "KK1", aspek: "Keterampilan Khusus", deskripsi_cpl: "Mampu merancang sistem informasi", id_kurikulum: "1" },
-  { id_cpl: "6", kode_cpl: "KK2", aspek: "Keterampilan Khusus", deskripsi_cpl: "Mampu mengembangkan aplikasi", id_kurikulum: "1" },
-  { id_cpl: "7", kode_cpl: "KK3", aspek: "Keterampilan Khusus", deskripsi_cpl: "Mampu mengelola basis data", id_kurikulum: "1" },
-];
-
-// Dummy Profil Lulusan data
+// Dummy Profil Lulusan data sesuai struktur baru (Kode, Profil Lulusan, Deskripsi, Sumber)
 const initialProfilLulusan: ProfilLulusan[] = [
   {
     id_profil: "1",
     kode_profil: "PL-01",
-    peran: "Software Engineer",
-    deskripsi: "Mampu merancang, mengembangkan, dan memelihara sistem perangkat lunak yang efisien dan berkualitas tinggi.",
+    profil_lulusan: "Software Engineer",
+    deskripsi: "Mampu merancang, mengembangkan, dan memelihara sistem perangkat lunak yang efisien dan berkualitas tinggi sesuai dengan kebutuhan industri.",
+    sumber: "KKNI Level 6, Asosiasi Profesi Informatika Indonesia",
     id_kurikulum: "1",
-    cpl_terkait: ["S1", "P1", "P2", "KK1", "KK2"],
   },
   {
     id_profil: "2",
     kode_profil: "PL-02",
-    peran: "Data Analyst",
-    deskripsi: "Mampu mengolah, menganalisis, dan menginterpretasi data untuk mendukung pengambilan keputusan bisnis.",
+    profil_lulusan: "Data Analyst",
+    deskripsi: "Mampu mengolah, menganalisis, dan menginterpretasi data untuk mendukung pengambilan keputusan bisnis secara akurat dan efektif.",
+    sumber: "KKNI Level 6, Standar Kompetensi Data Science",
     id_kurikulum: "1",
-    cpl_terkait: ["S1", "P1", "KK3"],
   },
   {
     id_profil: "3",
     kode_profil: "PL-03",
-    peran: "IT Consultant",
-    deskripsi: "Mampu memberikan solusi teknologi informasi yang tepat sesuai kebutuhan organisasi.",
+    profil_lulusan: "IT Consultant",
+    deskripsi: "Mampu memberikan solusi teknologi informasi yang tepat sesuai kebutuhan organisasi dan mampu berkomunikasi dengan pemangku kepentingan.",
+    sumber: "KKNI Level 6, Standar Kompetensi Konsultan IT",
     id_kurikulum: "1",
-    cpl_terkait: ["S1", "S2", "P1", "KK1"],
+  },
+  {
+    id_profil: "4",
+    kode_profil: "PL-04",
+    profil_lulusan: "System Administrator",
+    deskripsi: "Mampu mengelola, memelihara, dan mengamankan infrastruktur sistem informasi dalam organisasi.",
+    sumber: "KKNI Level 6, CompTIA Standards",
+    id_kurikulum: "1",
   },
 ];
 
@@ -73,30 +69,21 @@ export default function ProfilLulusanPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingProfil, setDeletingProfil] = useState<ProfilLulusan | null>(null);
 
-  // Form state
+  // Form state sesuai struktur baru
   const [formData, setFormData] = useState({
     kode_profil: "",
-    peran: "",
+    profil_lulusan: "",
     deskripsi: "",
-    cpl_terkait: [] as string[],
+    sumber: "",
   });
 
   // Filter profil lulusan
   const filteredProfil = profilList.filter(
     (p) =>
-      p.peran.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.kode_profil.toLowerCase().includes(searchTerm.toLowerCase())
+      p.profil_lulusan.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.kode_profil.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.deskripsi.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Handle CPL checkbox toggle
-  const toggleCPL = (kodeCPL: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      cpl_terkait: prev.cpl_terkait.includes(kodeCPL)
-        ? prev.cpl_terkait.filter((c) => c !== kodeCPL)
-        : [...prev.cpl_terkait, kodeCPL],
-    }));
-  };
 
   // Handle form submit
   const handleSubmit = () => {
@@ -136,18 +123,18 @@ export default function ProfilLulusanPage() {
       setEditingProfil(profil);
       setFormData({
         kode_profil: profil.kode_profil,
-        peran: profil.peran,
+        profil_lulusan: profil.profil_lulusan,
         deskripsi: profil.deskripsi,
-        cpl_terkait: profil.cpl_terkait || [],
+        sumber: profil.sumber,
       });
     } else {
       setEditingProfil(null);
       const nextCode = `PL-${String(profilList.length + 1).padStart(2, "0")}`;
       setFormData({
         kode_profil: nextCode,
-        peran: "",
+        profil_lulusan: "",
         deskripsi: "",
-        cpl_terkait: [],
+        sumber: "",
       });
     }
     setIsDialogOpen(true);
@@ -159,132 +146,149 @@ export default function ProfilLulusanPage() {
     setEditingProfil(null);
     setFormData({
       kode_profil: "",
-      peran: "",
+      profil_lulusan: "",
       deskripsi: "",
-      cpl_terkait: [],
+      sumber: "",
     });
   };
 
   return (
     <div className="space-y-6">
-        {/* Action Bar */}
+      {/* Header Stats */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="relative flex-1 max-w-sm">
-                <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Cari profil lulusan..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Profil</p>
+                <p className="text-2xl font-bold">{profilList.length}</p>
               </div>
-              <Button onClick={() => openDialog()}>
-                <Icons.Plus size={16} className="mr-2" />
-                Tambah Profil
-              </Button>
+              <Icons.GraduationCap className="h-8 w-8 text-muted-foreground/50" />
             </div>
           </CardContent>
         </Card>
-
-        {/* Table */}
         <Card>
-          <CardHeader>
-            <CardTitle>Daftar Profil Lulusan</CardTitle>
-            <CardDescription>
-              Peran yang diharapkan dapat dilakukan oleh lulusan di dunia kerja
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Kurikulum Aktif</p>
+                <p className="text-2xl font-bold">2024</p>
+              </div>
+              <Icons.BookOpen className="h-8 w-8 text-muted-foreground/50" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Action Bar */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <div className="relative flex-1 max-w-sm">
+              <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Cari profil lulusan..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Button onClick={() => openDialog()}>
+              <Icons.Plus size={16} className="mr-2" />
+              Tambah Profil Lulusan
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Daftar Profil Lulusan</CardTitle>
+          <CardDescription>
+            Total {filteredProfil.length} profil lulusan ditemukan
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-25">Kode</TableHead>
+                <TableHead className="w-45">Profil Lulusan</TableHead>
+                <TableHead>Deskripsi</TableHead>
+                <TableHead className="w-50">Sumber</TableHead>
+                <TableHead className="w-30 text-right">Aksi</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredProfil.length === 0 ? (
                 <TableRow>
-                  <TableHead className="w-[100px]">Kode</TableHead>
-                  <TableHead>Profil Lulusan</TableHead>
-                  <TableHead>Deskripsi</TableHead>
-                  <TableHead className="w-[200px]">CPL Terkait</TableHead>
-                  <TableHead className="w-[120px] text-right">Aksi</TableHead>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <Icons.GraduationCap size={40} className="opacity-50" />
+                      <p>Tidak ada data profil lulusan</p>
+                    </div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProfil.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <Icons.Users size={40} className="opacity-50" />
-                        <p>Tidak ada data profil lulusan</p>
+              ) : (
+                filteredProfil.map((profil) => (
+                  <TableRow key={profil.id_profil}>
+                    <TableCell>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                        {profil.kode_profil}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {profil.profil_lulusan}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground max-w-md">
+                      <p className="line-clamp-2">{profil.deskripsi}</p>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {profil.sumber}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openDialog(profil)}
+                        >
+                          <Icons.Edit size={14} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => {
+                            setDeletingProfil(profil);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Icons.Trash size={14} />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredProfil.map((profil) => (
-                    <TableRow key={profil.id_profil}>
-                      <TableCell className="font-mono text-sm font-medium">
-                        {profil.kode_profil}
-                      </TableCell>
-                      <TableCell className="font-medium">{profil.peran}</TableCell>
-                      <TableCell className="max-w-xs">
-                        <p className="truncate text-muted-foreground text-sm">
-                          {profil.deskripsi}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {profil.cpl_terkait?.map((cpl) => (
-                            <Badge
-                              key={cpl}
-                              variant="outline"
-                              className="text-xs cursor-help"
-                              title={
-                                dummyCPLs.find((c) => c.kode_cpl === cpl)
-                                  ?.deskripsi_cpl
-                              }
-                            >
-                              {cpl}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openDialog(profil)}
-                          >
-                            <Icons.Edit size={16} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => {
-                              setDeletingProfil(profil);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Icons.Trash size={16} />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingProfil ? "Edit Profil Lulusan" : "Tambah Profil Lulusan"}
+              {editingProfil ? "Edit Profil Lulusan" : "Tambah Profil Lulusan Baru"}
             </DialogTitle>
             <DialogDescription>
-              Tentukan peran lulusan dan hubungkan dengan CPL yang relevan
+              {editingProfil
+                ? "Ubah informasi profil lulusan yang sudah ada"
+                : "Tambahkan profil lulusan baru ke dalam kurikulum"}
             </DialogDescription>
           </DialogHeader>
 
@@ -305,13 +309,16 @@ export default function ProfilLulusanPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="peran">Nama Profil/Peran</Label>
+                <Label htmlFor="profil_lulusan">Profil Lulusan</Label>
                 <Input
-                  id="peran"
+                  id="profil_lulusan"
                   placeholder="Contoh: Software Engineer"
-                  value={formData.peran}
+                  value={formData.profil_lulusan}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, peran: e.target.value }))
+                    setFormData((prev) => ({
+                      ...prev,
+                      profil_lulusan: e.target.value,
+                    }))
                   }
                 />
               </div>
@@ -321,45 +328,31 @@ export default function ProfilLulusanPage() {
               <Label htmlFor="deskripsi">Deskripsi</Label>
               <Textarea
                 id="deskripsi"
-                placeholder="Deskripsi lengkap tentang profil lulusan..."
+                placeholder="Deskripsi lengkap profil lulusan..."
+                rows={4}
                 value={formData.deskripsi}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, deskripsi: e.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    deskripsi: e.target.value,
+                  }))
                 }
-                rows={3}
               />
             </div>
 
             <div className="space-y-2">
-              <Label>CPL Terkait</Label>
-              <p className="text-sm text-muted-foreground mb-2">
-                Pilih CPL yang mendukung profil lulusan ini
-              </p>
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-lg p-3">
-                {dummyCPLs.map((cpl) => (
-                  <label
-                    key={cpl.id_cpl}
-                    className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                      formData.cpl_terkait.includes(cpl.kode_cpl)
-                        ? "bg-primary/10 border-primary"
-                        : "hover:bg-accent"
-                    } border`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.cpl_terkait.includes(cpl.kode_cpl)}
-                      onChange={() => toggleCPL(cpl.kode_cpl)}
-                      className="mt-1"
-                    />
-                    <div>
-                      <span className="font-medium text-sm">{cpl.kode_cpl}</span>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {cpl.deskripsi_cpl}
-                      </p>
-                    </div>
-                  </label>
-                ))}
-              </div>
+              <Label htmlFor="sumber">Sumber</Label>
+              <Input
+                id="sumber"
+                placeholder="Contoh: KKNI Level 6, Asosiasi Profesi"
+                value={formData.sumber}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    sumber: e.target.value,
+                  }))
+                }
+              />
             </div>
           </div>
 
@@ -369,7 +362,7 @@ export default function ProfilLulusanPage() {
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!formData.kode_profil.trim() || !formData.peran.trim()}
+              disabled={!formData.kode_profil.trim() || !formData.profil_lulusan.trim()}
             >
               {editingProfil ? "Simpan Perubahan" : "Tambah"}
             </Button>
@@ -383,8 +376,9 @@ export default function ProfilLulusanPage() {
           <DialogHeader>
             <DialogTitle>Hapus Profil Lulusan</DialogTitle>
             <DialogDescription>
-              Apakah Anda yakin ingin menghapus profil "{deletingProfil?.peran}"?
-              Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus profil lulusan "
+              {deletingProfil?.profil_lulusan}"? Tindakan ini tidak dapat
+              dibatalkan.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
